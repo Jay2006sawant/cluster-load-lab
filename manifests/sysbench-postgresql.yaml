@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cluster-load-lab-sysbench
+  namespace: everest
+  labels:
+    app.kubernetes.io/name: cluster-load-lab
+    app.kubernetes.io/component: sysbench
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cluster-load-lab
+        app.kubernetes.io/component: sysbench
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: sysbench
+          image: ubuntu:24.04
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              set -eu
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update -qq
+              apt-get install -y -qq sysbench > /dev/null
+              # Edit host/user/password for your instance before applying.
+              sysbench --db-driver=pgsql \
+                --pgsql-host=REPLACE_PG_HOST \
+                --pgsql-port=5432 \
+                --pgsql-user=REPLACE_PG_USER \
+                --pgsql-password=REPLACE_PG_PASSWORD \
+                --pgsql-db=postgres \
+                oltp_read_write prepare --tables=4 --table-size=10000
+              sysbench --db-driver=pgsql \
+                --pgsql-host=REPLACE_PG_HOST \
+                --pgsql-port=5432 \
+                --pgsql-user=REPLACE_PG_USER \
+                --pgsql-password=REPLACE_PG_PASSWORD \
+                --pgsql-db=postgres \
+                oltp_read_write run --threads=8 --time=30 --report-interval=5
+              sysbench --db-driver=pgsql \
+                --pgsql-host=REPLACE_PG_HOST \
+                --pgsql-port=5432 \
+                --pgsql-user=REPLACE_PG_USER \
+                --pgsql-password=REPLACE_PG_PASSWORD \
+                --pgsql-db=postgres \
+                oltp_read_write cleanup --tables=4
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
