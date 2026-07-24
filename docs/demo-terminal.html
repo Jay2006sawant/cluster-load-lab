@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>cluster-load-lab demo</title>
+  <style>
+    body { margin: 0; background: #1e1e1e; font-family: ui-monospace, monospace; font-size: 13px; }
+    pre { color: #d4d4d4; padding: 24px; line-height: 1.5; margin: 0; }
+    .g { color: #4ec9b0; }
+    .y { color: #dcdcaa; }
+    .b { color: #569cd6; }
+    .m { color: #ce9178; }
+  </style>
+</head>
+<body>
+<pre><span class="g">$</span> cluster-load-lab run \
+    --namespace default \
+    --host postgres.default.svc.cluster.local \
+    --user postgres \
+    --password "$PGPASSWORD" \
+    --driver pgsql \
+    --threads 8 \
+    --duration 30
+
+<span class="y">created job default/cluster-load-lab-sysbench</span>
+<span class="b">--- sysbench logs ---</span>
+sysbench 1.0.20
+Running a OLTP test
+<span class="g">transactions: 40291 (4029.12 per sec.)</span>
+queries: 805820 (80582.40 per sec.)
+ignored errors: 0 (0.00 per sec.)
+reconnects: 0 (0.00 per sec.)
+
+<span class="b">--- summary ---</span>
+{
+  <span class="m">"job"</span>: <span class="m">"cluster-load-lab-sysbench"</span>,
+  <span class="m">"namespace"</span>: <span class="m">"default"</span>,
+  <span class="m">"tps"</span>: <span class="g">4029.12</span>,
+  <span class="m">"threads"</span>: 8,
+  <span class="m">"duration"</span>: 30
+}
+</pre>
+</body>
+</html>
